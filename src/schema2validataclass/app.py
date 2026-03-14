@@ -13,7 +13,13 @@ from schema2validataclass.common.helper import to_snake_case
 from schema2validataclass.common.uri import URI, UriType
 from schema2validataclass.config import Config, OutputFormat, PostProcessing
 from schema2validataclass.generator.generator import Generator
-from schema2validataclass.schema.base_outputs import EnumBaseOutput, NestedObjectBaseOutput, ObjectBaseOutput
+from schema2validataclass.schema.base_outputs import (
+    BaseOutput,
+    EnumBaseOutput,
+    ListBaseOutput,
+    NestedObjectBaseOutput,
+    ObjectBaseOutput,
+)
 from schema2validataclass.schema.dataclass_outputs import DATACLASS_OUTPUT_CLASSES, DataclassObjectOutput
 from schema2validataclass.schema.models import BaseField, Object, Schema
 from schema2validataclass.schema.validataclass_outputs import VALIDATACLASS_OUTPUT_CLASSES, ValidataclassObjectOutput
@@ -103,14 +109,23 @@ class App:
         self._run_post_processing(output_path)
 
     @staticmethod
+    def _get_referenced_object_name(output: BaseOutput) -> str | None:
+        if isinstance(output, NestedObjectBaseOutput):
+            return output.name
+        if isinstance(output, ListBaseOutput) and isinstance(output.output, NestedObjectBaseOutput):
+            return output.output.name
+        return None
+
+    @staticmethod
     def _remove_looping_references(object_outputs: list[ObjectBaseOutput]) -> None:
         # Build import graph: object_name → set of referenced object_names
         import_graph: dict[str, set[str]] = {}
         for object_output in object_outputs:
             referenced_names: set[str] = set()
             for output in object_output.outputs:
-                if isinstance(output, NestedObjectBaseOutput):
-                    referenced_names.add(output.name)
+                ref_name = App._get_referenced_object_name(output)
+                if ref_name is not None:
+                    referenced_names.add(ref_name)
             import_graph[object_output.name] = referenced_names
 
         # Detect back-edges via DFS
@@ -137,10 +152,12 @@ class App:
             outputs_to_remove = [
                 output
                 for output in object_output.outputs
-                if isinstance(output, NestedObjectBaseOutput) and (object_output.name, output.name) in back_edges
+                if (ref_name := App._get_referenced_object_name(output)) is not None
+                and (object_output.name, ref_name) in back_edges
             ]
             for output in outputs_to_remove:
-                logger.warning(f'removing looping reference {output.name} from {object_output.name}')
+                ref_name = App._get_referenced_object_name(output)
+                logger.warning(f'removing looping reference {ref_name} from {object_output.name}')
                 object_output.outputs.remove(output)
 
     def _run_post_processing(self, output_path: Path) -> None:

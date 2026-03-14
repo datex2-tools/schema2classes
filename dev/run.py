@@ -3,6 +3,7 @@ Copyright 2025 binary butterfly GmbH
 Use of this source code is governed by an MIT-style license that can be found in the LICENSE.txt.
 """
 
+import logging
 import sys
 from pathlib import Path
 
@@ -43,6 +44,8 @@ def main():
     args = parser.parse_args()
 
     config = Config.from_yaml(args.config) if args.config else Config()
+
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
     app = App(config=config)
     schema_uri = URI(file_path=args.schema_path)
