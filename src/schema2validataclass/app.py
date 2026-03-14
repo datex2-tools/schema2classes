@@ -5,7 +5,7 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 import json
 import logging
-import subprocess
+import subprocess  # noqa: S404
 from pathlib import Path
 from urllib.request import urlopen
 
@@ -13,7 +13,7 @@ from schema2validataclass.common.helper import to_snake_case
 from schema2validataclass.common.uri import URI, UriType
 from schema2validataclass.config import Config, OutputFormat, PostProcessing
 from schema2validataclass.generator.generator import Generator
-from schema2validataclass.schema.base_outputs import EnumBaseOutput, ObjectBaseOutput
+from schema2validataclass.schema.base_outputs import EnumBaseOutput, NestedObjectBaseOutput, ObjectBaseOutput
 from schema2validataclass.schema.dataclass_outputs import DATACLASS_OUTPUT_CLASSES, DataclassObjectOutput
 from schema2validataclass.schema.models import BaseField, Object, Schema
 from schema2validataclass.schema.validataclass_outputs import VALIDATACLASS_OUTPUT_CLASSES, ValidataclassObjectOutput
@@ -79,6 +79,9 @@ class App:
                 )
                 object_outputs.append(object_output)
 
+        if self.config.detect_looping_references:
+            self._remove_looping_references(object_outputs)
+
         enum_outputs: list[EnumBaseOutput] = []
         for object_output in object_outputs:
             enum_outputs += object_output.get_enum_outputs()
@@ -98,6 +101,47 @@ class App:
                 object_file.write(self.generator.generate_object(object_output))
 
         self._run_post_processing(output_path)
+
+    @staticmethod
+    def _remove_looping_references(object_outputs: list[ObjectBaseOutput]) -> None:
+        # Build import graph: object_name → set of referenced object_names
+        import_graph: dict[str, set[str]] = {}
+        for object_output in object_outputs:
+            referenced_names: set[str] = set()
+            for output in object_output.outputs:
+                if isinstance(output, NestedObjectBaseOutput):
+                    referenced_names.add(output.name)
+            import_graph[object_output.name] = referenced_names
+
+        # Detect back-edges via DFS
+        back_edges: set[tuple[str, str]] = set()
+        visited: set[str] = set()
+        in_stack: set[str] = set()
+
+        def dfs(node: str) -> None:
+            visited.add(node)
+            in_stack.add(node)
+            for neighbor in import_graph.get(node, set()):
+                if neighbor in in_stack:
+                    back_edges.add((node, neighbor))
+                elif neighbor not in visited:
+                    dfs(node=neighbor)
+            in_stack.discard(node)
+
+        for name in import_graph:
+            if name not in visited:
+                dfs(node=name)
+
+        # Remove outputs that create back-edges
+        for object_output in object_outputs:
+            outputs_to_remove = [
+                output
+                for output in object_output.outputs
+                if isinstance(output, NestedObjectBaseOutput) and (object_output.name, output.name) in back_edges
+            ]
+            for output in outputs_to_remove:
+                logger.warning(f'removing looping reference {output.name} from {object_output.name}')
+                object_output.outputs.remove(output)
 
     def _run_post_processing(self, output_path: Path) -> None:
         post_processing_commands = {

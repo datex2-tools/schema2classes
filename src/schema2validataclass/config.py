@@ -40,6 +40,7 @@ class Config:
     )
     output_format: OutputFormat = OutputFormat.VALIDATACLASS
     set_validataclass_mixin: bool = True
+    detect_looping_references: bool = True
     post_processing: list[PostProcessing] = field(
         default_factory=lambda: [PostProcessing.RUFF_FORMAT, PostProcessing.RUFF_CHECK],
     )
