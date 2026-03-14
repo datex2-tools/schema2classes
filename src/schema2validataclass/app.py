@@ -5,12 +5,13 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 import json
 import logging
+import subprocess
 from pathlib import Path
 from urllib.request import urlopen
 
 from schema2validataclass.common.helper import to_snake_case
 from schema2validataclass.common.uri import URI, UriType
-from schema2validataclass.config import Config, OutputFormat
+from schema2validataclass.config import Config, OutputFormat, PostProcessing
 from schema2validataclass.generator.generator import Generator
 from schema2validataclass.schema.base_outputs import EnumBaseOutput, ObjectBaseOutput
 from schema2validataclass.schema.dataclass_outputs import DATACLASS_OUTPUT_CLASSES, DataclassObjectOutput
@@ -95,6 +96,25 @@ class App:
             object_path = Path(output_path, f'{to_snake_case(object_output.name)}.py')
             with object_path.open('w') as object_file:
                 object_file.write(self.generator.generate_object(object_output))
+
+        self._run_post_processing(output_path)
+
+    def _run_post_processing(self, output_path: Path) -> None:
+        post_processing_commands = {
+            PostProcessing.RUFF_FORMAT: ['ruff', 'format'],
+            PostProcessing.RUFF_CHECK: ['ruff', 'check', '--fix'],
+        }
+        for step in self.config.post_processing:
+            command = post_processing_commands[step]
+            for file_path in output_path.glob('*.py'):
+                try:
+                    subprocess.run(  # noqa: S603
+                        [*command, str(file_path)],
+                        check=True,
+                        capture_output=True,
+                    )
+                except (subprocess.CalledProcessError, FileNotFoundError) as e:
+                    logger.warning(f'post-processing {step.value} failed on {file_path.name}: {e}')
 
     @staticmethod
     def read_schema(uri: URI) -> dict:
