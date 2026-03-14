@@ -1,21 +1,25 @@
 # schema2validataclass
 
-A Python code generator that transforms [JSON Schema](https://json-schema.org/) definitions into Python dataclasses with [`@validataclass`](https://github.com/binary-butterfly/validataclass) decorators and Enum classes.
+A Python code generator that transforms [JSON Schema](https://json-schema.org/) definitions into Python [`@validataclass`](https://github.com/binary-butterfly/validataclass)-decorated dataclasses or plain `@dataclass` classes, along with Enum classes.
 
 ## Features
 
 - Parses JSON Schema files, including `$ref` references across multiple files and remote schemas (HTTP)
-- Generates `@validataclass`-decorated dataclasses with typed validator fields
+- Generates `@validataclass`-decorated dataclasses with typed validator fields, or plain `@dataclass` classes
 - Generates Python `Enum` classes for JSON Schema `enum` types
 - Supports nested objects, arrays, references with property overrides, and schema inheritance
 - Handles required vs. optional fields with configurable `UnsetValue` / `None` defaults
 - Resolves schema dependency graphs automatically by following `$ref` chains
+- Detects and breaks circular `$ref` references to prevent import cycles
+- Configurable via YAML configuration file
 
 ## Requirements
 
 - Python >= 3.12
-- [Jinja2](https://jinja.palletsprojects.com/) (runtime)
-- [validataclass](https://github.com/binary-butterfly/validataclass) (used in generated code)
+- [Jinja2](https://jinja.palletsprojects.com/) (template rendering)
+- [PyYAML](https://pyyaml.org/) (configuration file parsing)
+- [Ruff](https://docs.astral.sh/ruff/) (post-processing of generated files)
+- [validataclass](https://github.com/binary-butterfly/validataclass) (used in generated code, not needed for `@dataclass` output)
 
 ## Installation
 
@@ -76,17 +80,91 @@ class DayEnum(Enum):
     WEDNESDAY = "wednesday"
 ```
 
+### `@dataclass` output
+
+Instead of generating `@validataclass`-decorated classes, the generator can produce plain Python `@dataclass` classes. This is useful when you don't need runtime validation and want lightweight data containers with no external dependencies beyond the standard library.
+
+Set `output_format: dataclass` in your config file (see [Configuration](#configuration) below):
+
+```yaml
+output_format: dataclass
+```
+
+The same schema that produces the validataclass example above generates:
+
+```python
+from dataclasses import dataclass
+
+@dataclass(kw_only=True)
+class ClosureInformationInput:
+    permananentlyClosed: bool | None = None
+    temporarilyClosed: bool | None = None
+    closedFrom: str | None = None
+```
+
+Key differences from `@validataclass` output:
+
+- Uses Python's built-in `@dataclass(kw_only=True)` decorator
+- Fields are plain type annotations without validators
+- Optional fields default to `None` instead of `UnsetValue`
+- Required fields are bare type annotations (e.g. `name: str`)
+- No dependency on the `validataclass` package
+- `set_validataclass_mixin` and `unset_value_output` config options have no effect
+
+### Loop detection
+
+JSON Schemas can contain circular `$ref` references (e.g. `A → B → C → A`). Without intervention, this would produce Python files with circular imports that fail at runtime.
+
+The generator automatically detects and breaks these cycles. It builds a directed import graph of all generated classes, then runs a depth-first search to find back-edges (the references that close a cycle). When a back-edge is found, the offending field is removed from the generated class and a warning is logged.
+
+For example, given schemas where `SecondObject` references `ThirdObject` and `ThirdObject` references back to `SecondObject`, the generator removes the back-reference from `ThirdObject` to break the cycle.
+
+This works for both direct object references and references inside arrays (lists).
+
+Loop detection is enabled by default. To disable it:
+
+```yaml
+detect_looping_references: false
+```
+
 ## Configuration
 
-The generator is configured via the `Config` dataclass in `src/schema2validataclass/config.py`. Key options:
+The generator can be configured via a YAML file passed with the `-c` / `--config` flag:
 
-| Option                    | Default          | Description                                                                                            |
-|---------------------------|------------------|--------------------------------------------------------------------------------------------------------|
-| `unset_value_output`      | `UNSET_VALUE`    | How optional fields are represented: `UNSET_VALUE` (uses `UnsetValue`) or `NONE` (uses `None`)         |
-| `object_postfix`          | `'Input'`        | Suffix appended to generated class names (e.g. `ClosureInformation` becomes `ClosureInformationInput`) |
-| `set_validataclass_mixin` | `True`           | Whether generated classes inherit from `ValidataclassMixin`                                            |
-| `ignored_uris`            | `[]`             | List of field URI paths to skip during generation                                                      |
-| `header`                  | Copyright header | Python file header prepended to every generated file                                                   |
+```bash
+schema2validataclass input/schema.json output/ -c config.yaml
+```
+
+All options have sensible defaults and are optional. Example `config.yaml`:
+
+```yaml
+output_format: validataclass
+object_postfix: Input
+unset_value_output: UNSET_VALUE
+set_validataclass_mixin: true
+detect_looping_references: true
+post_processing:
+  - ruff-format
+  - ruff-check
+ignored_uris: []
+header: |
+  """
+  Custom copyright header.
+  """
+```
+
+### Options
+
+| Option                      | Default                     | Description                                                                                            |
+|-----------------------------|-----------------------------|--------------------------------------------------------------------------------------------------------|
+| `output_format`             | `validataclass`             | Output style: `validataclass` (with validators) or `dataclass` (plain Python dataclasses)              |
+| `unset_value_output`        | `UNSET_VALUE`               | How optional fields are represented: `UNSET_VALUE` (uses `UnsetValue`) or `NONE` (uses `None`)         |
+| `object_postfix`            | `'Input'`                   | Suffix appended to generated class names (e.g. `ClosureInformation` becomes `ClosureInformationInput`) |
+| `set_validataclass_mixin`   | `true`                      | Whether generated validataclass classes inherit from `ValidataclassMixin`                              |
+| `detect_looping_references` | `true`                      | Detect and remove circular `$ref` chains to prevent import cycles                                      |
+| `post_processing`           | `[ruff-format, ruff-check]` | Post-processing steps to run on generated files                                                        |
+| `ignored_uris`              | `[]`                        | List of field URI paths to skip during generation                                                      |
+| `header`                    | Copyright header            | Python file header prepended to every generated file                                                   |
 
 ## Supported JSON Schema types
 
