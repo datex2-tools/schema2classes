@@ -5,7 +5,7 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 from pathlib import Path
 
-from tests.integration.helpers import INPUT_DIR, generated_files, run_generate
+from tests.integration.dataclass.helpers import INPUT_DIR, generated_files, run_generate
 
 SCHEMA_PATH = INPUT_DIR / 'chained_schemas' / 'main_schema.json'
 
@@ -24,28 +24,23 @@ def test_main_class_references_second(tmp_path: Path):
     run_generate(SCHEMA_PATH, tmp_path)
     content = (tmp_path / 'simple_schema_input.py').read_text()
 
-    assert 'class SimpleSchemaInput(ValidataclassMixin):' in content
-    assert (
-        'SecondObject: SecondObjectInput | UnsetValueType = DataclassValidator(SecondObjectInput), Default(UnsetValue)'
-        in content
-    )
+    assert 'class SimpleSchemaInput:' in content
+    assert 'SecondObject: SecondObjectInput | None = None' in content
 
 
 def test_second_class_references_third(tmp_path: Path):
     run_generate(SCHEMA_PATH, tmp_path)
     content = (tmp_path / 'second_object_input.py').read_text()
 
-    assert 'class SecondObjectInput(ValidataclassMixin):' in content
-    assert (
-        'ThirdObject: ThirdObjectInput | UnsetValueType = DataclassValidator(ThirdObjectInput), Default(UnsetValue)'
-        in content
-    )
-    assert 'second_string: str | UnsetValueType = StringValidator(), Default(UnsetValue)' in content
+    assert 'class SecondObjectInput:' in content
+    assert 'ThirdObject: ThirdObjectInput | None = None' in content
+    assert 'second_string: str | None = None' in content
 
 
 def test_third_class(tmp_path: Path):
     run_generate(SCHEMA_PATH, tmp_path)
     content = (tmp_path / 'third_object_input.py').read_text()
 
-    assert 'class ThirdObjectInput(ValidataclassMixin):' in content
-    assert 'third_string: str | UnsetValueType = StringValidator(), Default(UnsetValue)' in content
+    assert '@dataclass(kw_only=True)' in content
+    assert 'class ThirdObjectInput:' in content
+    assert 'third_string: str | None = None' in content

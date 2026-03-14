@@ -5,6 +5,9 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+
+import yaml
 
 
 class UnsetValueOutput(Enum):
@@ -18,6 +21,11 @@ class UnsetValueOutput(Enum):
         return {self.NONE: 'None', self.UNSET_VALUE: 'UnsetValue'}.get(self)
 
 
+class OutputFormat(Enum):
+    VALIDATACLASS = 'validataclass'
+    DATACLASS = 'dataclass'
+
+
 @dataclass(kw_only=True)
 class Config:
     unset_value_output: UnsetValueOutput = UnsetValueOutput.UNSET_VALUE
@@ -25,9 +33,22 @@ class Config:
     ignored_uris: list[str] = field(
         default_factory=list,
     )
+    output_format: OutputFormat = OutputFormat.VALIDATACLASS
     set_validataclass_mixin: bool = True
     header: str = '''"""
 Copyright 2026 binary butterfly GmbH
 Use of this source code is governed by an MIT-style license that can be found in the LICENSE.txt.
 """
     '''
+
+    @classmethod
+    def from_yaml(cls, path: Path) -> 'Config':
+        with path.open() as f:
+            data = yaml.safe_load(f) or {}
+
+        if 'unset_value_output' in data:
+            data['unset_value_output'] = UnsetValueOutput(data['unset_value_output'])
+        if 'output_format' in data:
+            data['output_format'] = OutputFormat(data['output_format'])
+
+        return cls(**data)

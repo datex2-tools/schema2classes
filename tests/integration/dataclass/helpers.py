@@ -7,8 +7,9 @@ from pathlib import Path
 
 from schema2validataclass import App
 from schema2validataclass.common.uri import URI
+from schema2validataclass.config import Config, OutputFormat
 
-INPUT_DIR = Path(__file__).resolve().parent.parent / 'test_schema' / 'input'
+INPUT_DIR = Path(__file__).resolve().parent.parent.parent / 'test_schema' / 'input'
 
 
 def generated_files(output_path: Path) -> set[str]:
@@ -16,5 +17,6 @@ def generated_files(output_path: Path) -> set[str]:
 
 
 def run_generate(schema_path: Path, output_path: Path):
-    app = App()
+    config = Config(output_format=OutputFormat.DATACLASS)
+    app = App(config=config)
     app.generate(URI(file_path=schema_path), output_path)

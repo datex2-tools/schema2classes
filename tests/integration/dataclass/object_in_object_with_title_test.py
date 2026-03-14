@@ -5,7 +5,7 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 from pathlib import Path
 
-from tests.integration.helpers import INPUT_DIR, generated_files, run_generate
+from tests.integration.dataclass.helpers import INPUT_DIR, generated_files, run_generate
 
 SCHEMA_PATH = INPUT_DIR / 'object_in_object_with_title.json'
 
@@ -19,24 +19,22 @@ def test_main_class_references_nested_object(tmp_path: Path):
     run_generate(SCHEMA_PATH, tmp_path)
     content = (tmp_path / 'simple_schema_input.py').read_text()
 
-    assert 'class SimpleSchemaInput(ValidataclassMixin):' in content
-    assert (
-        'test_object: TestObjectInput | UnsetValueType = DataclassValidator(TestObjectInput), Default(UnsetValue)'
-        in content
-    )
+    assert 'class SimpleSchemaInput:' in content
+    assert 'test_object: TestObjectInput | None = None' in content
+    assert 'DataclassValidator' not in content
 
 
 def test_nested_object_class(tmp_path: Path):
     run_generate(SCHEMA_PATH, tmp_path)
     content = (tmp_path / 'test_object_input.py').read_text()
 
-    assert 'class TestObjectInput(ValidataclassMixin):' in content
-    assert 'test_property: str | UnsetValueType = StringValidator(), Default(UnsetValue)' in content
+    assert '@dataclass(kw_only=True)' in content
+    assert 'class TestObjectInput:' in content
+    assert 'test_property: str | None = None' in content
 
 
-def test_dataclass_validator_import(tmp_path: Path):
+def test_nested_object_import(tmp_path: Path):
     run_generate(SCHEMA_PATH, tmp_path)
     content = (tmp_path / 'simple_schema_input.py').read_text()
 
-    assert 'DataclassValidator' in content
     assert 'from .test_object_input import TestObjectInput' in content

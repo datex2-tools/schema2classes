@@ -10,10 +10,12 @@ from urllib.request import urlopen
 
 from schema2validataclass.common.helper import to_snake_case
 from schema2validataclass.common.uri import URI, UriType
-from schema2validataclass.config import Config
+from schema2validataclass.config import Config, OutputFormat
 from schema2validataclass.generator.generator import Generator
+from schema2validataclass.schema.base_outputs import EnumBaseOutput, ObjectBaseOutput
+from schema2validataclass.schema.dataclass_outputs import DATACLASS_OUTPUT_CLASSES, DataclassObjectOutput
 from schema2validataclass.schema.models import BaseField, Object, Schema
-from schema2validataclass.schema.outputs import EnumOutput, ObjectOutput
+from schema2validataclass.schema.validataclass_outputs import VALIDATACLASS_OUTPUT_CLASSES, ValidataclassObjectOutput
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +24,18 @@ class App:
     config: Config
     generator: Generator
 
-    def __init__(self):
-        self.config = Config()
+    def __init__(self, config: Config | None = None):
+        self.config = config or Config()
         self.generator = Generator(config=self.config)
 
     def generate(self, schema_uri: URI, output_path: Path):
+        if self.config.output_format == OutputFormat.DATACLASS:
+            object_output_class = DataclassObjectOutput
+            output_classes = DATACLASS_OUTPUT_CLASSES
+        else:
+            object_output_class = ValidataclassObjectOutput
+            output_classes = VALIDATACLASS_OUTPUT_CLASSES
+
         main_schema_dict = self.read_schema(schema_uri)
 
         main_schema = Schema(main_schema_dict, uri=schema_uri)
@@ -51,23 +60,25 @@ class App:
                     continue
                 referencable_fields[field.uri] = field
 
-        main_object_output = ObjectOutput(
+        main_object_output = object_output_class(
             main_schema.contained_object,
             config=self.config,
             referencable_fields=referencable_fields,
+            output_classes=output_classes,
         )
 
-        object_outputs: list[ObjectOutput] = [main_object_output]
+        object_outputs: list[ObjectBaseOutput] = [main_object_output]
         for referencable_field in referencable_fields.values():
             if isinstance(referencable_field, Object):
-                object_output = ObjectOutput(
+                object_output = object_output_class(
                     referencable_field,
                     config=self.config,
                     referencable_fields=referencable_fields,
+                    output_classes=output_classes,
                 )
                 object_outputs.append(object_output)
 
-        enum_outputs: list[EnumOutput] = []
+        enum_outputs: list[EnumBaseOutput] = []
         for object_output in object_outputs:
             enum_outputs += object_output.get_enum_outputs()
 
@@ -83,7 +94,7 @@ class App:
         for object_output in object_outputs:
             object_path = Path(output_path, f'{to_snake_case(object_output.name)}.py')
             with object_path.open('w') as object_file:
-                object_file.write(self.generator.generate_validataclass(object_output))
+                object_file.write(self.generator.generate_object(object_output))
 
     @staticmethod
     def read_schema(uri: URI) -> dict:

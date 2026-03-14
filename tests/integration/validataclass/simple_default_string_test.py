@@ -5,7 +5,7 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 from pathlib import Path
 
-from tests.integration.helpers import INPUT_DIR, generated_files, run_generate
+from tests.integration.validataclass.helpers import INPUT_DIR, generated_files, run_generate
 
 SCHEMA_PATH = INPUT_DIR / 'simple_default_string.json'
 

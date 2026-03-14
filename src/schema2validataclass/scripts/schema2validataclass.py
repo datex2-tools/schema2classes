@@ -12,6 +12,7 @@ import argparse
 
 from schema2validataclass import App
 from schema2validataclass.common.uri import URI
+from schema2validataclass.config import Config
 
 
 def main():
@@ -32,13 +33,20 @@ def main():
         help='Path to output directory',
     )
 
-    args = parser.parse_args()
-    schema_path: Path = args.schema_path
-    output_path: Path = args.output_path
+    parser.add_argument(
+        '-c',
+        '--config',
+        type=Path,
+        help='Path to YAML configuration file',
+    )
 
-    app = App()
-    schema_uri = URI(file_path=schema_path)
-    app.generate(schema_uri, output_path)
+    args = parser.parse_args()
+
+    config = Config.from_yaml(args.config) if args.config else Config()
+
+    app = App(config=config)
+    schema_uri = URI(file_path=args.schema_path)
+    app.generate(schema_uri, args.output_path)
 
 
 if __name__ == '__main__':
