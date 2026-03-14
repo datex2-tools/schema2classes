@@ -1,0 +1,9 @@
+{{ config.header }}
+
+from enum import Enum
+
+
+class {{ model.name }}(Enum):
+{%- for line in model.render_enum_values() %}
+    {{ line }}
+{%- endfor %}

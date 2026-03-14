@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "Simple Schema",
+  "properties": {
+    "second_objects": {
+      "type": "array",
+      "items": {
+        "$ref": "second_schema.json#/definitions/SecondObject"
+      }
+    }
+  }
+}

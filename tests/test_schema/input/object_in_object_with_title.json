@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "Simple Schema",
+  "properties": {
+    "test_object": {
+      "type": "object",
+      "title": "Test Object",
+      "properties": {
+        "test_property": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "Simple Schema",
+  "properties": {
+    "test_string": {
+      "type": "string"
+    },
+    "test_integer": {
+      "type": "integer"
+    },
+    "test_number": {
+      "type": "number"
+    },
+    "test_boolean": {
+      "type": "boolean"
+    },
+    "test_required_string": {
+      "type": "string"
+    },
+    "test_enum": {
+      "enum": ["foo", "bar"]
+    }
+  }
+}

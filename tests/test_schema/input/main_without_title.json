@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "test_string": {
+      "type": "string",
+      "title": "Test String",
+      "description": "This is a test string"
+    },
+    "test_integer": {
+      "type": "integer"
+    },
+    "test_number": {
+      "type": "number"
+    },
+    "test_boolean": {
+      "type": "boolean"
+    }
+  }
+}

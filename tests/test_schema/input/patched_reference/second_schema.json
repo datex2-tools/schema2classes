@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "definitions": {
+    "Watt": {
+      "minimum": 0,
+      "$ref": "third_schema.json#/definitions/Integer"
+    }
+  }
+}

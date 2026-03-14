@@ -1,0 +1,12 @@
+*.py[cod]
+.idea
+/.pytest_cache
+
+/venv
+/.venv
+/logs
+/temp
+/output
+/input
+
+/tests/test_schema/output
