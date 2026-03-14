@@ -4,7 +4,6 @@ Use of this source code is governed by an MIT-style license that can be found in
 """
 
 from schema2validataclass.schema.models import Array, Integer, Object, Reference, String, get_reference_base_uris
-
 from tests.unit.helpers import make_uri
 
 

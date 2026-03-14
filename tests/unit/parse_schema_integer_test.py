@@ -4,7 +4,6 @@ Use of this source code is governed by an MIT-style license that can be found in
 """
 
 from schema2validataclass.schema.models import Integer, parse_schema
-
 from tests.unit.helpers import make_uri
 
 
