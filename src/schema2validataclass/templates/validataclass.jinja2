@@ -19,3 +19,20 @@ class {{ model.name }}{% if config.set_validataclass_mixin %}(ValidataclassMixin
 {%- else %}
     ...
 {%- endfor %}
+{%- set field_mapping = model.get_field_mapping() %}
+{%- if field_mapping %}
+
+    @staticmethod
+    def __pre_validate__(input_data: dict) -> dict:
+        field_mapping = {
+{%- for from_key, to_key in field_mapping.items() %}
+            '{{ from_key }}': '{{ to_key }}',
+{%- endfor %}
+        }
+
+        for from_key, to_key in field_mapping.items():
+            if from_key in input_data:
+                input_data[to_key] = input_data.pop(from_key)
+
+        return input_data
+{%- endif %}

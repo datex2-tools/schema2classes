@@ -28,5 +28,5 @@ def test_fields_present(tmp_path: Path):
 
     assert 'test_string: str | None = None' in content
     assert 'test_integer: int | None = None' in content
-    assert 'test_number: int | None = None' in content
+    assert 'test_number: float | None = None' in content
     assert 'test_boolean: bool | None = None' in content

@@ -28,5 +28,5 @@ def test_fields_present(tmp_path: Path):
 
     assert 'test_string: str | UnsetValueType = StringValidator(), Default(UnsetValue)' in content
     assert 'test_integer: int | UnsetValueType = IntegerValidator(), Default(UnsetValue)' in content
-    assert 'test_number: int | UnsetValueType = FloatValidator(), Default(UnsetValue)' in content
+    assert 'test_number: float | UnsetValueType = FloatValidator(), Default(UnsetValue)' in content
     assert 'test_boolean: bool | UnsetValueType = BooleanValidator(), Default(UnsetValue)' in content

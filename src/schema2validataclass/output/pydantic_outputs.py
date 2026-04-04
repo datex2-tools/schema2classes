@@ -178,6 +178,8 @@ class PydanticNestedObjectOutput(PydanticRenderMixin, NestedObjectBaseOutput):
 class PydanticObjectOutput(ObjectBaseOutput):
     def get_imports(self) -> list[str]:
         raw_imports: list[str] = ['pydantic.BaseModel']
+        if self.get_field_mapping():
+            raw_imports += ['pydantic.model_validator', 'typing.Any']
         for output in self.outputs:
             raw_imports += output.get_imports()
         return self._format_imports(raw_imports)

@@ -42,8 +42,8 @@ def test_enum_file_generated(tmp_path: Path):
     content = (tmp_path / 'test_enum.py').read_text()
 
     assert 'class TestEnum(Enum):' in content
-    assert 'FOO = "foo"' in content
-    assert 'BAR = "bar"' in content
+    assert "FOO = 'foo'" in content
+    assert "BAR = 'bar'" in content
 
 
 def test_required_field_imports(tmp_path: Path):

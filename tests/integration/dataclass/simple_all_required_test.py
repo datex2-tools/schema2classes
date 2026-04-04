@@ -23,5 +23,5 @@ def test_main_class_fields(tmp_path: Path):
     assert 'class SimpleSchemaInput:' in content
     assert 'test_string: str | None = None' in content
     assert 'test_integer: int | None = None' in content
-    assert 'test_number: int | None = None' in content
+    assert 'test_number: float | None = None' in content
     assert 'test_boolean: bool | None = None' in content

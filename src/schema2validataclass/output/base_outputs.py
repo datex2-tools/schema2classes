@@ -32,6 +32,7 @@ class BaseOutput(ABC):
     field: BaseField
     config: Config
     key: str
+    original_key: str | None = None
     title: str | None = None
     description: str | None = None
     default: Any | None = None
@@ -45,6 +46,13 @@ class BaseOutput(ABC):
         # We need to apply inheritance in reverse order
         for reference in reversed(references):
             self.apply_field(reference)
+
+        # Rename properties that conflict with Python reserved words
+        if self.key in self.config.renamed_properties:
+            self.original_key = self.key
+            self.key = f'{self.key}_'
+        else:
+            self.original_key = None
 
     def apply_field(self, field: BaseField) -> None:
         self.key = field.uri.key
@@ -177,7 +185,7 @@ class EnumBaseOutput(BaseOutput, ABC):
     def render_enum_values(self) -> list[str]:
         result: list[str] = []
         for enum_value in self.enum_values:
-            result.append(f'{get_enum_name(enum_value)} = "{enum_value}"')
+            result.append(f"{get_enum_name(enum_value)} = '{enum_value}'")
         return result
 
 
@@ -325,6 +333,13 @@ class ObjectBaseOutput(ABC):
             result_imports.append(f'from {key} import {", ".join(value)}')
 
         return result_imports
+
+    def get_field_mapping(self) -> dict[str, str]:
+        mapping = {}
+        for output in self.outputs:
+            if output.original_key is not None:
+                mapping[output.original_key] = output.key
+        return mapping
 
     def get_enum_outputs(self) -> list[EnumBaseOutput]:
         enum_outputs: list[EnumBaseOutput] = []

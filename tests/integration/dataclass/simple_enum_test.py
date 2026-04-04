@@ -28,8 +28,8 @@ def test_enum_output(tmp_path: Path):
     content = (tmp_path / 'test_enum.py').read_text()
 
     assert 'class TestEnum(Enum):' in content
-    assert 'FOO = "foo"' in content
-    assert 'BAR = "bar"' in content
+    assert "FOO = 'foo'" in content
+    assert "BAR = 'bar'" in content
 
 
 def test_enum_import_without_validator(tmp_path: Path):
