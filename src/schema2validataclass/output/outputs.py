@@ -21,6 +21,10 @@ from .dataclass_outputs import (  # noqa: F401
     DATACLASS_OUTPUT_CLASSES,
     DataclassObjectOutput,
 )
+from .pydantic_outputs import (  # noqa: F401
+    PYDANTIC_OUTPUT_CLASSES,
+    PydanticObjectOutput,
+)
 from .validataclass_outputs import (  # noqa: F401
     VALIDATACLASS_OUTPUT_CLASSES,
     ValidataclassObjectOutput,

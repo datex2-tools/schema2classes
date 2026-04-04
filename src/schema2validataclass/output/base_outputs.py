@@ -9,11 +9,10 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
 
-from schema2validataclass.common.helper import get_class_name, get_enum_name, to_snake_case
+from schema2validataclass.common.helper import get_class_name, get_enum_name
 from schema2validataclass.common.uri import URI
 from schema2validataclass.config import Config
-
-from .models import (
+from schema2validataclass.schema.models import (
     Array,
     BaseField,
     Boolean,
@@ -128,7 +127,7 @@ class FloatBaseOutput(BaseOutput, ABC):
 
     @staticmethod
     def get_type() -> str:
-        return 'int'
+        return 'float'
 
 
 @dataclass(kw_only=True, init=False)
@@ -211,7 +210,9 @@ class ListBaseOutput(BaseOutput, ABC):
         output_classes: dict,
         **kwargs,
     ):
-        super().__init__(field, config=config, referencable_fields=referencable_fields, output_classes=output_classes, **kwargs)
+        super().__init__(
+            field, config=config, referencable_fields=referencable_fields, output_classes=output_classes, **kwargs
+        )
 
         item_field = field.items
 

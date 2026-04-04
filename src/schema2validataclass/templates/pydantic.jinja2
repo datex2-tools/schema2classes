@@ -1,0 +1,17 @@
+{{ config.header }}
+
+{%- for import_line in model.get_imports() %}
+{{ import_line }}
+{%- endfor %}
+
+class {{ model.name }}(BaseModel):
+{%- if model.description %}
+    """
+    {{ model.description }}
+    """
+{%- endif %}
+{%- for output in model.outputs %}
+    {{ output.render() }}
+{%- else %}
+    ...
+{%- endfor %}

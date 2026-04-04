@@ -24,6 +24,7 @@ class UnsetValueOutput(Enum):
 class OutputFormat(Enum):
     VALIDATACLASS = 'validataclass'
     DATACLASS = 'dataclass'
+    PYDANTIC = 'pydantic'
 
 
 class PostProcessing(Enum):

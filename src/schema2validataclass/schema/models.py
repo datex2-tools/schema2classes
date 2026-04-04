@@ -200,9 +200,13 @@ class Schema:
             self.contained_object = Object(schema, uri=uri)
 
         self.definitions = []
-        raw_definitions: dict[str, Any] = schema.get('$defs', {}) or schema.get('definitions', {})
+        raw_definitions: dict[str, Any] = schema.get('definitions', {})
         for key, child_schema in raw_definitions.items():
             self.definitions.append(parse_schema(child_schema, uri=URI.from_uri(uri, f'/definitions/{key}')))
+
+        raw_defs: dict[str, Any] = schema.get('$defs', {})
+        for key, child_schema in raw_defs.items():
+            self.definitions.append(parse_schema(child_schema, uri=URI.from_uri(uri, f'/$defs/{key}')))
 
     @property
     def properties(self) -> list[BaseField]:
