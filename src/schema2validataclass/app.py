@@ -7,6 +7,7 @@ import json
 import logging
 import subprocess  # noqa: S404
 from pathlib import Path
+from typing import Callable
 from urllib.request import urlopen
 
 from schema2validataclass.common.helper import to_snake_case
@@ -23,7 +24,7 @@ from schema2validataclass.output.base_outputs import (
 from schema2validataclass.output.dataclass_outputs import DATACLASS_OUTPUT_CLASSES, DataclassObjectOutput
 from schema2validataclass.output.pydantic_outputs import PYDANTIC_OUTPUT_CLASSES, PydanticObjectOutput
 from schema2validataclass.output.validataclass_outputs import VALIDATACLASS_OUTPUT_CLASSES, ValidataclassObjectOutput
-from schema2validataclass.schema.models import BaseField, Object, Schema
+from schema2validataclass.schema.models import Array, BaseField, Object, Reference, Schema, get_reference_uris
 
 logger = logging.getLogger(__name__)
 
@@ -44,29 +45,43 @@ class App:
         }
         object_output_class, output_classes = output_format_map[self.config.output_format]
 
-        main_schema_dict = self.read_schema(schema_uri)
+        # Schema file cache: each file is read and parsed only once
+        schema_cache: dict[URI, Schema] = {}
 
-        main_schema = Schema(main_schema_dict, uri=schema_uri)
-        schema_objects: dict[URI, Schema] = {schema_uri: main_schema}
-        schemas_to_load: list[URI] = main_schema.get_reference_base_uris()
-        while len(schemas_to_load):
-            child_schema = schemas_to_load.pop()
-            logger.info(f'parsing {child_schema} ...')
-            child_schema_dict = self.read_schema(child_schema)
-            child_schema_object = Schema(child_schema_dict, uri=child_schema)
-            schema_objects[child_schema] = child_schema_object
-            for reference_uri in child_schema_object.get_reference_base_uris():
-                if reference_uri not in schema_objects:
-                    schemas_to_load.append(reference_uri)
+        main_schema = self.get_or_load_schema(schema_cache, schema_uri)
 
-        # Check Reference Uniqueness and generate referencable fields
+        # Build referencable_fields by walking the reference tree from the main schema
         referencable_fields: dict[URI, BaseField] = {}
-        for schema_object in list(schema_objects.values()):
-            for field in schema_object.properties + schema_object.definitions:
-                if field.uri in referencable_fields:
-                    logger.warning(f'Duplicate field: {field.uri}')
-                    continue
-                referencable_fields[field.uri] = field
+
+        # Main schema's contained_object properties are always included
+        for field in main_schema.properties:
+            referencable_fields[field.uri] = field
+
+        # Tree traversal: follow references starting from the main schema's properties
+        refs_to_process: list[URI] = get_reference_uris(main_schema.properties)
+        processed_refs: set[URI] = set()
+
+        while refs_to_process:
+            ref_uri = refs_to_process.pop()
+            if ref_uri in processed_refs:
+                continue
+            processed_refs.add(ref_uri)
+
+            base_uri = URI.from_uri_without_json_path(ref_uri)
+            schema = self.get_or_load_schema(schema_cache, base_uri)
+
+            field = schema.get_field_by_uri(ref_uri)
+            if field is None:
+                logger.warning(f'Referenced field not found: {ref_uri}')
+                continue
+
+            if ref_uri in referencable_fields:
+                logger.warning(f'Duplicate field: {ref_uri}')
+                continue
+            referencable_fields[ref_uri] = field
+
+            # Discover further references from this field
+            refs_to_process.extend(get_reference_uris([field]))
 
         main_object_output = object_output_class(
             main_schema.contained_object,
@@ -108,6 +123,65 @@ class App:
                 object_file.write(self.generator.generate_object(object_output))
 
         self._run_post_processing(output_path)
+
+    def _is_ignored_reference(self, ref_uri: URI) -> bool:
+        ref_str = str(ref_uri)
+        for pattern in self.config.ignore_references:
+            if ref_str.endswith(pattern):
+                return True
+        return False
+
+    def get_or_load_schema(self, schema_cache: dict[URI, Schema], base_uri: URI) -> Schema:
+        if base_uri not in schema_cache:
+            logger.info(f'parsing {base_uri} ...')
+            schema_dict = self.read_schema(base_uri)
+            schema = Schema(schema_dict, uri=base_uri)
+            self._apply_ignore_paths(schema)
+            self._apply_ignore_references(schema)
+            schema_cache[base_uri] = schema
+        return schema_cache[base_uri]
+
+    def _apply_ignore_paths(self, schema: Schema) -> None:
+        if not self.config.ignore_paths:
+            return
+        if schema.contained_object:
+            self._filter_object_properties(schema.contained_object, self._is_ignored_path)
+        for definition in schema.definitions:
+            if isinstance(definition, Object):
+                self._filter_object_properties(definition, self._is_ignored_path)
+
+    def _apply_ignore_references(self, schema: Schema) -> None:
+        if not self.config.ignore_references:
+            return
+        if schema.contained_object:
+            self._filter_object_properties(schema.contained_object, self._is_ignored_reference_property)
+        for definition in schema.definitions:
+            if isinstance(definition, Object):
+                self._filter_object_properties(definition, self._is_ignored_reference_property)
+
+    def _filter_object_properties(self, obj: Object, predicate: Callable) -> None:
+        obj.properties = [prop for prop in obj.properties if not predicate(prop)]
+        for prop in obj.properties:
+            if isinstance(prop, Object):
+                self._filter_object_properties(prop, predicate)
+            if isinstance(prop, Array) and isinstance(prop.items, Object):
+                self._filter_object_properties(prop.items, predicate)
+
+    def _is_ignored_path(self, field: BaseField) -> bool:
+        uri_str = str(field.uri)
+        for pattern in self.config.ignore_paths:
+            if uri_str.endswith(pattern):
+                logger.info(f'skipping ignored path {field.uri}')
+                return True
+        return False
+
+    def _is_ignored_reference_property(self, field: BaseField) -> bool:
+        ref = field
+        if isinstance(ref, Array):
+            ref = ref.items
+        if not isinstance(ref, Reference):
+            return False
+        return self._is_ignored_reference(ref.to)
 
     @staticmethod
     def _get_referenced_object_name(output: BaseOutput) -> str | None:

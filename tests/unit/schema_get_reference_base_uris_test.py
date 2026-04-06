@@ -17,7 +17,7 @@ def test_from_object_properties():
         },
         uri=make_uri(),
     )
-    uris = schema.get_reference_base_uris()
+    uris = schema.get_reference_uris()
     assert len(uris) == 1
 
 
@@ -30,7 +30,7 @@ def test_from_definitions():
         },
         uri=make_uri(),
     )
-    uris = schema.get_reference_base_uris()
+    uris = schema.get_reference_uris()
     assert len(uris) == 1
 
 
@@ -47,7 +47,7 @@ def test_from_both():
         },
         uri=make_uri(),
     )
-    uris = schema.get_reference_base_uris()
+    uris = schema.get_reference_uris()
     assert len(uris) == 2
 
 
@@ -59,7 +59,7 @@ def test_no_references():
         },
         uri=make_uri(),
     )
-    assert schema.get_reference_base_uris() == []
+    assert schema.get_reference_uris() == []
 
 
 def test_definitions_only_no_object():
@@ -71,5 +71,5 @@ def test_definitions_only_no_object():
         },
         uri=make_uri(),
     )
-    uris = schema.get_reference_base_uris()
+    uris = schema.get_reference_uris()
     assert len(uris) == 1

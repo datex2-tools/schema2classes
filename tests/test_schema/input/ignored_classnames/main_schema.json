@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "Main Schema",
+  "properties": {
+    "kept_object": {
+      "$ref": "kept_schema.json#/definitions/KeptObject"
+    },
+    "ignored_object": {
+      "$ref": "ignored_schema.json#/definitions/IgnoredObject"
+    },
+    "ignored_list": {
+      "type": "array",
+      "items": {
+        "$ref": "ignored_schema.json#/definitions/IgnoredObject"
+      }
+    },
+    "normal_field": {
+      "type": "string"
+    }
+  }
+}

@@ -37,13 +37,16 @@ class PostProcessing(Enum):
 class Config:
     unset_value_output: UnsetValueOutput = UnsetValueOutput.UNSET_VALUE
     object_postfix: str = 'Input'
-    ignored_uris: list[str] = field(
-        default_factory=list,
-    )
     output_format: OutputFormat = OutputFormat.VALIDATACLASS
     set_validataclass_mixin: bool = True
     renamed_properties: list[str] = field(
         default_factory=lambda: keyword.kwlist,
+    )
+    ignore_references: list[str] = field(
+        default_factory=list,
+    )
+    ignore_paths: list[str] = field(
+        default_factory=list,
     )
     detect_looping_references: bool = True
     post_processing: list[PostProcessing] = field(

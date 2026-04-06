@@ -15,7 +15,7 @@ def test_no_references():
         },
         uri=make_uri(),
     )
-    assert obj.get_reference_base_uris() == []
+    assert obj.get_reference_uris() == []
 
 
 def test_direct_reference():
@@ -28,9 +28,9 @@ def test_direct_reference():
         },
         uri=make_uri(),
     )
-    uris = obj.get_reference_base_uris()
+    uris = obj.get_reference_uris()
     assert len(uris) == 1
-    assert uris[0].json_path == ''
+    assert uris[0].json_path == '/definitions/Foo'
 
 
 def test_reference_in_array_items():
@@ -46,11 +46,26 @@ def test_reference_in_array_items():
         },
         uri=make_uri(),
     )
-    uris = obj.get_reference_base_uris()
+    uris = obj.get_reference_uris()
     assert len(uris) == 1
 
 
-def test_multiple_references_to_same_file_deduplicated():
+def test_multiple_references_to_same_definition_deduplicated():
+    obj = Object(
+        {
+            'type': 'object',
+            'properties': {
+                'a': {'$ref': 'other.json#/definitions/Foo'},
+                'b': {'$ref': 'other.json#/definitions/Foo'},
+            },
+        },
+        uri=make_uri(),
+    )
+    uris = obj.get_reference_uris()
+    assert len(uris) == 1
+
+
+def test_same_file_different_definitions_not_deduplicated():
     obj = Object(
         {
             'type': 'object',
@@ -61,8 +76,8 @@ def test_multiple_references_to_same_file_deduplicated():
         },
         uri=make_uri(),
     )
-    uris = obj.get_reference_base_uris()
-    assert len(uris) == 1
+    uris = obj.get_reference_uris()
+    assert len(uris) == 2
 
 
 def test_references_to_different_files():
@@ -76,7 +91,7 @@ def test_references_to_different_files():
         },
         uri=make_uri(),
     )
-    uris = obj.get_reference_base_uris()
+    uris = obj.get_reference_uris()
     assert len(uris) == 2
 
 
@@ -95,5 +110,5 @@ def test_reference_in_nested_object():
         },
         uri=make_uri(),
     )
-    uris = obj.get_reference_base_uris()
+    uris = obj.get_reference_uris()
     assert len(uris) == 1

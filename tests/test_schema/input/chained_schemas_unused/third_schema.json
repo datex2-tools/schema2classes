@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "definitions": {
+    "ThirdObject": {
+      "type": "object",
+      "properties": {
+        "third_string": {
+          "type": "string"
+        }
+      }
+    },
+    "UnusedObject": {
+      "type": "object",
+      "properties": {
+        "ignored_string": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
