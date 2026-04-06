@@ -3,6 +3,7 @@ Copyright 2026 binary butterfly GmbH
 Use of this source code is governed by an MIT-style license that can be found in the LICENSE.txt.
 """
 
+import keyword
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -24,6 +25,7 @@ class UnsetValueOutput(Enum):
 class OutputFormat(Enum):
     VALIDATACLASS = 'validataclass'
     DATACLASS = 'dataclass'
+    PYDANTIC = 'pydantic'
 
 
 class PostProcessing(Enum):
@@ -40,6 +42,9 @@ class Config:
     )
     output_format: OutputFormat = OutputFormat.VALIDATACLASS
     set_validataclass_mixin: bool = True
+    renamed_properties: list[str] = field(
+        default_factory=lambda: keyword.kwlist,
+    )
     detect_looping_references: bool = True
     post_processing: list[PostProcessing] = field(
         default_factory=lambda: [PostProcessing.RUFF_FORMAT, PostProcessing.RUFF_CHECK],

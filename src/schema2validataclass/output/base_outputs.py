@@ -9,11 +9,10 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
 
-from schema2validataclass.common.helper import get_class_name, get_enum_name, to_snake_case
+from schema2validataclass.common.helper import get_class_name, get_enum_name
 from schema2validataclass.common.uri import URI
 from schema2validataclass.config import Config
-
-from .models import (
+from schema2validataclass.schema.models import (
     Array,
     BaseField,
     Boolean,
@@ -33,6 +32,7 @@ class BaseOutput(ABC):
     field: BaseField
     config: Config
     key: str
+    original_key: str | None = None
     title: str | None = None
     description: str | None = None
     default: Any | None = None
@@ -46,6 +46,13 @@ class BaseOutput(ABC):
         # We need to apply inheritance in reverse order
         for reference in reversed(references):
             self.apply_field(reference)
+
+        # Rename properties that conflict with Python reserved words
+        if self.key in self.config.renamed_properties:
+            self.original_key = self.key
+            self.key = f'{self.key}_'
+        else:
+            self.original_key = None
 
     def apply_field(self, field: BaseField) -> None:
         self.key = field.uri.key
@@ -128,7 +135,7 @@ class FloatBaseOutput(BaseOutput, ABC):
 
     @staticmethod
     def get_type() -> str:
-        return 'int'
+        return 'float'
 
 
 @dataclass(kw_only=True, init=False)
@@ -178,7 +185,7 @@ class EnumBaseOutput(BaseOutput, ABC):
     def render_enum_values(self) -> list[str]:
         result: list[str] = []
         for enum_value in self.enum_values:
-            result.append(f'{get_enum_name(enum_value)} = "{enum_value}"')
+            result.append(f"{get_enum_name(enum_value)} = '{enum_value}'")
         return result
 
 
@@ -211,7 +218,9 @@ class ListBaseOutput(BaseOutput, ABC):
         output_classes: dict,
         **kwargs,
     ):
-        super().__init__(field, config=config, referencable_fields=referencable_fields, output_classes=output_classes, **kwargs)
+        super().__init__(
+            field, config=config, referencable_fields=referencable_fields, output_classes=output_classes, **kwargs
+        )
 
         item_field = field.items
 
@@ -324,6 +333,13 @@ class ObjectBaseOutput(ABC):
             result_imports.append(f'from {key} import {", ".join(value)}')
 
         return result_imports
+
+    def get_field_mapping(self) -> dict[str, str]:
+        mapping = {}
+        for output in self.outputs:
+            if output.original_key is not None:
+                mapping[output.original_key] = output.key
+        return mapping
 
     def get_enum_outputs(self) -> list[EnumBaseOutput]:
         enum_outputs: list[EnumBaseOutput] = []

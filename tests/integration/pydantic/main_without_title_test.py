@@ -5,7 +5,7 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 from pathlib import Path
 
-from tests.integration.validataclass.helpers import INPUT_DIR, generated_files, run_generate
+from tests.integration.pydantic.helpers import INPUT_DIR, generated_files, run_generate
 
 SCHEMA_PATH = INPUT_DIR / 'main_without_title.json'
 
@@ -19,14 +19,14 @@ def test_class_name_derived_from_filename(tmp_path: Path):
     run_generate(SCHEMA_PATH, tmp_path)
     content = (tmp_path / 'main_without_title_input.py').read_text()
 
-    assert 'class MainWithoutTitleInput(ValidataclassMixin):' in content
+    assert 'class MainWithoutTitleInput(BaseModel):' in content
 
 
 def test_fields_present(tmp_path: Path):
     run_generate(SCHEMA_PATH, tmp_path)
     content = (tmp_path / 'main_without_title_input.py').read_text()
 
-    assert 'test_string: str | UnsetValueType = StringValidator(), Default(UnsetValue)' in content
-    assert 'test_integer: int | UnsetValueType = IntegerValidator(), Default(UnsetValue)' in content
-    assert 'test_number: float | UnsetValueType = FloatValidator(), Default(UnsetValue)' in content
-    assert 'test_boolean: bool | UnsetValueType = BooleanValidator(), Default(UnsetValue)' in content
+    assert 'test_string: str | None = None' in content
+    assert 'test_integer: int | None = None' in content
+    assert 'test_number: float | None = None' in content
+    assert 'test_boolean: bool | None = None' in content

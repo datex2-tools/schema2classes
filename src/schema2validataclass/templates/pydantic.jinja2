@@ -3,12 +3,8 @@
 {%- for import_line in model.get_imports() %}
 {{ import_line }}
 {%- endfor %}
-{%- if config.set_validataclass_mixin %}
-from validataclass.dataclasses import ValidataclassMixin
-{%- endif %}
 
-@validataclass
-class {{ model.name }}{% if config.set_validataclass_mixin %}(ValidataclassMixin){% endif %}:
+class {{ model.name }}(BaseModel):
 {%- if model.description %}
     """
     {{ model.description }}
@@ -22,8 +18,11 @@ class {{ model.name }}{% if config.set_validataclass_mixin %}(ValidataclassMixin
 {%- set field_mapping = model.get_field_mapping() %}
 {%- if field_mapping %}
 
-    @staticmethod
-    def __pre_validate__(input_data: dict) -> dict:
+    @model_validator(mode='before')
+    @classmethod
+    def _rename_properties(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
         field_mapping = {
 {%- for from_key, to_key in field_mapping.items() %}
             '{{ from_key }}': '{{ to_key }}',
@@ -31,8 +30,8 @@ class {{ model.name }}{% if config.set_validataclass_mixin %}(ValidataclassMixin
         }
 
         for from_key, to_key in field_mapping.items():
-            if from_key in input_data:
-                input_data[to_key] = input_data.pop(from_key)
+            if from_key in data:
+                data[to_key] = data.pop(from_key)
 
-        return input_data
+        return data
 {%- endif %}

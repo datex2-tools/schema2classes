@@ -13,16 +13,17 @@ from schema2validataclass.common.helper import to_snake_case
 from schema2validataclass.common.uri import URI, UriType
 from schema2validataclass.config import Config, OutputFormat, PostProcessing
 from schema2validataclass.generator.generator import Generator
-from schema2validataclass.schema.base_outputs import (
+from schema2validataclass.output.base_outputs import (
     BaseOutput,
     EnumBaseOutput,
     ListBaseOutput,
     NestedObjectBaseOutput,
     ObjectBaseOutput,
 )
-from schema2validataclass.schema.dataclass_outputs import DATACLASS_OUTPUT_CLASSES, DataclassObjectOutput
+from schema2validataclass.output.dataclass_outputs import DATACLASS_OUTPUT_CLASSES, DataclassObjectOutput
+from schema2validataclass.output.pydantic_outputs import PYDANTIC_OUTPUT_CLASSES, PydanticObjectOutput
+from schema2validataclass.output.validataclass_outputs import VALIDATACLASS_OUTPUT_CLASSES, ValidataclassObjectOutput
 from schema2validataclass.schema.models import BaseField, Object, Schema
-from schema2validataclass.schema.validataclass_outputs import VALIDATACLASS_OUTPUT_CLASSES, ValidataclassObjectOutput
 
 logger = logging.getLogger(__name__)
 
@@ -36,12 +37,12 @@ class App:
         self.generator = Generator(config=self.config)
 
     def generate(self, schema_uri: URI, output_path: Path):
-        if self.config.output_format == OutputFormat.DATACLASS:
-            object_output_class = DataclassObjectOutput
-            output_classes = DATACLASS_OUTPUT_CLASSES
-        else:
-            object_output_class = ValidataclassObjectOutput
-            output_classes = VALIDATACLASS_OUTPUT_CLASSES
+        output_format_map = {
+            OutputFormat.VALIDATACLASS: (ValidataclassObjectOutput, VALIDATACLASS_OUTPUT_CLASSES),
+            OutputFormat.DATACLASS: (DataclassObjectOutput, DATACLASS_OUTPUT_CLASSES),
+            OutputFormat.PYDANTIC: (PydanticObjectOutput, PYDANTIC_OUTPUT_CLASSES),
+        }
+        object_output_class, output_classes = output_format_map[self.config.output_format]
 
         main_schema_dict = self.read_schema(schema_uri)
 

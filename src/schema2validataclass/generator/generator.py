@@ -6,7 +6,7 @@ Use of this source code is governed by an MIT-style license that can be found in
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from schema2validataclass.config import Config, OutputFormat
-from schema2validataclass.schema.base_outputs import EnumBaseOutput, ObjectBaseOutput
+from schema2validataclass.output.base_outputs import EnumBaseOutput, ObjectBaseOutput
 
 
 class Generator:
@@ -18,10 +18,12 @@ class Generator:
         return self.env.get_template('init.jinja2').render(config=self.config)
 
     def generate_object(self, model: ObjectBaseOutput) -> str:
-        if self.config.output_format == OutputFormat.DATACLASS:
-            template = 'dataclass.jinja2'
-        else:
-            template = 'validataclass.jinja2'
+        templates = {
+            OutputFormat.VALIDATACLASS: 'validataclass.jinja2',
+            OutputFormat.DATACLASS: 'dataclass.jinja2',
+            OutputFormat.PYDANTIC: 'pydantic.jinja2',
+        }
+        template = templates[self.config.output_format]
         return self.env.get_template(template).render(model=model, config=self.config)
 
     def generate_enum(self, model: EnumBaseOutput) -> str:
