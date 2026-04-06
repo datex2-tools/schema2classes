@@ -242,15 +242,14 @@ class App:
         }
         for step in self.config.post_processing:
             command = post_processing_commands[step]
-            for file_path in output_path.glob('*.py'):
-                try:
-                    subprocess.run(  # noqa: S603
-                        [*command, str(file_path)],
-                        check=True,
-                        capture_output=True,
-                    )
-                except (subprocess.CalledProcessError, FileNotFoundError) as e:
-                    logger.warning(f'post-processing {step.value} failed on {file_path.name}: {e}')
+            try:
+                subprocess.run(  # noqa: S603
+                    [*command, str(output_path)],
+                    check=True,
+                    capture_output=True,
+                )
+            except (subprocess.CalledProcessError, FileNotFoundError) as e:
+                logger.warning(f'post-processing {step.value} failed: {e}')
 
     @staticmethod
     def read_schema(uri: URI) -> dict:
