@@ -10,21 +10,21 @@ from pathlib import Path
 from typing import Callable
 from urllib.request import urlopen
 
-from schema2validataclass.common.helper import to_snake_case
-from schema2validataclass.common.uri import URI, UriType
-from schema2validataclass.config import Config, OutputFormat, PostProcessing
-from schema2validataclass.generator.generator import Generator
-from schema2validataclass.output.base_outputs import (
+from schema2classes.common.helper import to_snake_case
+from schema2classes.common.uri import URI, UriType
+from schema2classes.config import Config, OutputFormat, PostProcessing
+from schema2classes.generator.generator import Generator
+from schema2classes.output.base_outputs import (
     BaseOutput,
     EnumBaseOutput,
     ListBaseOutput,
     NestedObjectBaseOutput,
     ObjectBaseOutput,
 )
-from schema2validataclass.output.dataclass_outputs import DATACLASS_OUTPUT_CLASSES, DataclassObjectOutput
-from schema2validataclass.output.pydantic_outputs import PYDANTIC_OUTPUT_CLASSES, PydanticObjectOutput
-from schema2validataclass.output.validataclass_outputs import VALIDATACLASS_OUTPUT_CLASSES, ValidataclassObjectOutput
-from schema2validataclass.schema.models import Array, BaseField, Object, Reference, Schema, get_reference_uris
+from schema2classes.output.dataclass_outputs import DATACLASS_OUTPUT_CLASSES, DataclassObjectOutput
+from schema2classes.output.pydantic_outputs import PYDANTIC_OUTPUT_CLASSES, PydanticObjectOutput
+from schema2classes.output.validataclass_outputs import VALIDATACLASS_OUTPUT_CLASSES, ValidataclassObjectOutput
+from schema2classes.schema.models import Array, BaseField, Object, Reference, Schema, get_reference_uris
 
 logger = logging.getLogger(__name__)
 

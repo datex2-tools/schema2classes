@@ -8,7 +8,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
-from schema2validataclass.common.helper import to_snake_case
+from schema2classes.common.helper import to_snake_case
 
 from .base_outputs import (
     BooleanBaseOutput,

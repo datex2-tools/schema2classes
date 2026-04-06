@@ -9,10 +9,10 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
 
-from schema2validataclass.common.helper import get_class_name, get_enum_name
-from schema2validataclass.common.uri import URI
-from schema2validataclass.config import Config
-from schema2validataclass.schema.models import (
+from schema2classes.common.helper import get_class_name, get_enum_name
+from schema2classes.common.uri import URI
+from schema2classes.config import Config
+from schema2classes.schema.models import (
     Array,
     BaseField,
     Boolean,

@@ -1,4 +1,4 @@
-# schema2validataclass
+# schema2classes
 
 A Python code generator that transforms [JSON Schema](https://json-schema.org/) definitions into Python [`@validataclass`](https://github.com/binary-butterfly/validataclass)-decorated dataclasses, plain `@dataclass` classes, or [Pydantic](https://docs.pydantic.dev/) `BaseModel` classes, along with Enum classes.
 
@@ -28,20 +28,20 @@ A Python code generator that transforms [JSON Schema](https://json-schema.org/) 
 ## Installation
 
 ```bash
-uv add schema2validataclass
+uv add schema2classes
 ```
 
 Or with pip:
 
 ```bash
-pip install schema2validataclass
+pip install schema2classes
 ```
 
 
 ## Usage
 
 ```bash
-schema2validataclass <schema_path> <output_path>
+schema2classes <schema_path> <output_path>
 ```
 
 **Arguments:**
@@ -54,7 +54,7 @@ schema2validataclass <schema_path> <output_path>
 **Example:**
 
 ```bash
-schema2validataclass input/schema.json output/
+schema2classes input/schema.json output/
 ```
 
 This reads the schema, recursively resolves all `$ref` references to other schema files, and generates:
@@ -160,7 +160,7 @@ detect_looping_references: false
 The generator can be configured via a YAML file passed with the `-c` / `--config` flag:
 
 ```bash
-schema2validataclass input/schema.json output/ -c config.yaml
+schema2classes input/schema.json output/ -c config.yaml
 ```
 
 All options have sensible defaults and are optional. Example `config.yaml`:

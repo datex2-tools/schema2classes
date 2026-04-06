@@ -10,9 +10,9 @@ sys.path.append(str(Path(Path(__file__).parent.parent, 'src')))  # noqa: E402
 
 import argparse
 
-from schema2validataclass import App
-from schema2validataclass.common.uri import URI
-from schema2validataclass.config import Config
+from schema2classes import App
+from schema2classes.common.uri import URI
+from schema2classes.config import Config
 
 
 def main():
