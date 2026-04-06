@@ -58,7 +58,7 @@ jobs:
           path: dist/
 
       - name: Install built package and test dependencies
-        run: uv sync --group dev && uv pip install --python .venv dist/schema2validataclass-*.whl --force-reinstall --no-deps
+        run: uv sync --group dev && uv pip install --python .venv dist/schema2classes-*.whl --force-reinstall --no-deps
 
       - name: Run unit tests
         run: uv run pytest

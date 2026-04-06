@@ -308,7 +308,7 @@ wheels = [
 ]
 
 [[package]]
-name = "schema2validataclass"
+name = "schema2classes"
 source = { editable = "." }
 dependencies = [
     { name = "jinja2" },

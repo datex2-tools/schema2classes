@@ -1,5 +1,5 @@
 [project]
-name = "schema2validataclass"
+name = "schema2classes"
 dynamic = ["version"]
 authors = [
     {name="Ernesto Ruge, binary butterfly GmbH", email="ernesto.ruge@binary-butterfly.de"},
@@ -35,9 +35,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/datex2-tools/schema2validataclass"
-Repository = "git@github.com:datex2-tools/schema2validataclass.git"
-Issues = "https://github.com/datex2-tools/schema2validataclass/issues"
+Homepage = "https://github.com/datex2-tools/schema2classes"
+Repository = "git@github.com:datex2-tools/schema2classes.git"
+Issues = "https://github.com/datex2-tools/schema2classes/issues"
 
 [dependency-groups]
 dev = [
@@ -57,7 +57,7 @@ build-backend = "hatchling.build"
 source = "vcs"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/schema2validataclass"]
+packages = ["src/schema2classes"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --import-mode=importlib --cov-context=test --cov-report="
@@ -131,7 +131,7 @@ line-length = 120
     # Don't require __init__.py files
     "INP",
 ]
-"src/schema2validataclass/scripts/*" = [
+"src/schema2classes/scripts/*" = [
     # Don't require __init__.py files
     "INP",
 ]

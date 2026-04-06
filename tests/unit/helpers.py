@@ -5,7 +5,7 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 from pathlib import Path
 
-from schema2validataclass.common.uri import URI
+from schema2classes.common.uri import URI
 
 
 def make_uri(**kwargs) -> URI:

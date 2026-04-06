@@ -5,7 +5,7 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 import pytest
 
-from schema2validataclass.schema.models import parse_schema
+from schema2classes.schema.models import parse_schema
 from tests.unit.helpers import make_uri
 
 

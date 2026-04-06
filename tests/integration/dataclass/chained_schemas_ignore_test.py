@@ -5,9 +5,9 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 from pathlib import Path
 
-from schema2validataclass import App
-from schema2validataclass.common.uri import URI
-from schema2validataclass.config import Config, OutputFormat
+from schema2classes import App
+from schema2classes.common.uri import URI
+from schema2classes.config import Config, OutputFormat
 from tests.integration.dataclass.helpers import INPUT_DIR, generated_files
 
 SCHEMA_PATH = INPUT_DIR / 'chained_schemas_ignore' / 'main_schema.json'

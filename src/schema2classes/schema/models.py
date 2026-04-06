@@ -6,7 +6,7 @@ Use of this source code is governed by an MIT-style license that can be found in
 from dataclasses import dataclass
 from typing import Any
 
-from schema2validataclass.common.uri import URI
+from schema2classes.common.uri import URI
 
 
 @dataclass(kw_only=True, init=False)

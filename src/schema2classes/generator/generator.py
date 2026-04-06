@@ -5,13 +5,13 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from schema2validataclass.config import Config, OutputFormat
-from schema2validataclass.output.base_outputs import EnumBaseOutput, ObjectBaseOutput
+from schema2classes.config import Config, OutputFormat
+from schema2classes.output.base_outputs import EnumBaseOutput, ObjectBaseOutput
 
 
 class Generator:
     def __init__(self, config: Config):
-        self.env = Environment(loader=PackageLoader('schema2validataclass'), autoescape=select_autoescape())
+        self.env = Environment(loader=PackageLoader('schema2classes'), autoescape=select_autoescape())
         self.config = config
 
     def generate_init(self) -> str:

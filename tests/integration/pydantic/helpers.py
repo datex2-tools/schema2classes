@@ -5,9 +5,9 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 from pathlib import Path
 
-from schema2validataclass import App
-from schema2validataclass.common.uri import URI
-from schema2validataclass.config import Config, OutputFormat
+from schema2classes import App
+from schema2classes.common.uri import URI
+from schema2classes.config import Config, OutputFormat
 
 INPUT_DIR = Path(__file__).resolve().parent.parent.parent / 'test_schema' / 'input'
 
