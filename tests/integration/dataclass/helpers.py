@@ -17,6 +17,6 @@ def generated_files(output_path: Path) -> set[str]:
 
 
 def run_generate(schema_path: Path, output_path: Path):
-    config = Config(output_format=OutputFormat.DATACLASS)
+    config = Config(output_format=OutputFormat.DATACLASS, post_processing=[])
     app = App(config=config)
     app.generate(URI(file_path=schema_path), output_path)

@@ -185,8 +185,8 @@ class Object(BaseField):
                 result.extend(field.items.get_objects())
         return result
 
-    def get_reference_base_uris(self) -> list[URI]:
-        return get_reference_base_uris(self.properties)
+    def get_reference_uris(self) -> list[URI]:
+        return get_reference_uris(self.properties)
 
 
 @dataclass(kw_only=True, init=False)
@@ -212,11 +212,21 @@ class Schema:
     def properties(self) -> list[BaseField]:
         return self.contained_object.properties if self.contained_object else []
 
-    def get_reference_base_uris(self) -> list[URI]:
-        reference_uris = get_reference_base_uris(self.definitions)
+    def get_reference_uris(self) -> list[URI]:
+        reference_uris = get_reference_uris(self.definitions)
         if self.contained_object:
-            reference_uris.extend(self.contained_object.get_reference_base_uris())
+            reference_uris.extend(self.contained_object.get_reference_uris())
         return reference_uris
+
+    def get_field_by_uri(self, uri: URI) -> BaseField | None:
+        for field in self.definitions:
+            if field.uri == uri:
+                return field
+        if self.contained_object:
+            for field in self.contained_object.properties:
+                if field.uri == uri:
+                    return field
+        return None
 
 
 def parse_schema(schema: dict, **kwargs) -> BaseField:
@@ -243,17 +253,14 @@ def parse_schema(schema: dict, **kwargs) -> BaseField:
     raise ValueError(f'Unsupported type: {schema.get("type")}')
 
 
-def get_reference_base_uris(fields: list[BaseField]) -> list[URI]:
+def get_reference_uris(fields: list[BaseField]) -> list[URI]:
     result: list[URI] = []
     for field in fields:
-        # Incrementally look in children
         if isinstance(field, Object):
-            result.extend(field.get_reference_base_uris())
-
-        # Get References
-        if isinstance(field, Reference) and field.uri is not None:
-            result.append(URI.from_uri_without_json_path(field.to))
-        if isinstance(field, Array) and isinstance(field.items, Reference) and field.items.uri is not None:
-            result.append(URI.from_uri_without_json_path(field.items.to))
+            result.extend(field.get_reference_uris())
+        if isinstance(field, Reference):
+            result.append(field.to)
+        if isinstance(field, Array) and isinstance(field.items, Reference):
+            result.append(field.items.to)
 
     return list(set(result))

@@ -9,4 +9,5 @@
 /output
 /input
 
+/src/schema2validataclass/_version.py
 /tests/test_schema/output

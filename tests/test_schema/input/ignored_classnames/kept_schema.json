@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "definitions": {
+    "KeptObject": {
+      "type": "object",
+      "properties": {
+        "shared_child": {
+          "$ref": "shared_child_schema.json#/definitions/SharedChild"
+        },
+        "kept_string": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

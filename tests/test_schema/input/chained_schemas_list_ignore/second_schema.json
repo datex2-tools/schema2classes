@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "definitions": {
+    "SecondObject": {
+      "type": "object",
+      "properties": {
+        "ThirdObject": {
+          "$ref": "third_schema.json#/definitions/ThirdObject"
+        },
+        "IgnoredObject": {
+          "type": "array",
+          "items": {
+            "$ref": "third_schema.json#/definitions/IgnoredObject"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "definitions": {
+    "IgnoredObject": {
+      "type": "object",
+      "properties": {
+        "shared_child": {
+          "$ref": "shared_child_schema.json#/definitions/SharedChild"
+        },
+        "exclusive_child": {
+          "$ref": "exclusive_child_schema.json#/definitions/ExclusiveChild"
+        },
+        "ignored_string": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

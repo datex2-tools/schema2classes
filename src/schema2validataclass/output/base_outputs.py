@@ -291,9 +291,6 @@ class ObjectBaseOutput(ABC):
                 references.append(field)
                 field = follow_reference(field, referencable_fields=referencable_fields)
 
-            if str(field.uri.json_path) in self.config.ignored_uris:
-                continue
-
             if field is None:
                 continue
 
