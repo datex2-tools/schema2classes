@@ -31,7 +31,7 @@ classifiers = [
 dependencies = [
     "jinja2~=3.1.6",
     "pyyaml~=6.0.3",
-    "ruff~=0.15.6",
+    "ruff~=0.15.9",
 ]
 
 [project.urls]
@@ -39,28 +39,25 @@ Homepage = "https://github.com/datex2-tools/schema2validataclass"
 Repository = "git@github.com:datex2-tools/schema2validataclass.git"
 Issues = "https://github.com/datex2-tools/schema2validataclass/issues"
 
-[project.optional-dependencies]
-testing = [
-    "ruff~=0.15.6",
+[dependency-groups]
+dev = [
     "validataclass~=0.11.0",
     "pytest~=9.0.2",
-    "pytest-cov~=7.0.0",
+    "pytest-cov~=7.1.0",
 ]
 
 [build-system]
 requires = [
-    "setuptools",
-    "setuptools_scm",
-    "wheel",
+    "hatchling",
+    "hatch-vcs",
 ]
-build-backend = "setuptools.build_meta"
+build-backend = "hatchling.build"
 
-[tool.setuptools.package-data]
-"pkgname" = ["py.typed"]
+[tool.hatch.version]
+source = "vcs"
 
-[tool.setuptools_scm]
-write_to = "src/schema2validataclass/_version.py"
-version_scheme = "post-release"
+[tool.hatch.build.targets.wheel]
+packages = ["src/schema2validataclass"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --import-mode=importlib --cov-context=test --cov-report="
