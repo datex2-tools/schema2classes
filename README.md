@@ -212,17 +212,21 @@ Both use suffix matching, so you can omit leading path components.
 
 ## Supported JSON Schema types
 
-| JSON Schema type        | validataclass                                                   | dataclass / pydantic                                 |
-|-------------------------|-----------------------------------------------------------------|------------------------------------------------------|
-| `boolean`               | `BooleanValidator()`                                            | `bool`                                               |
-| `integer`               | `IntegerValidator(min_value=..., ...)`                          | `int` / `Annotated[int, Field(ge=..., ...)]`         |
-| `number`                | `FloatValidator(min_value=..., ...)`                            | `float` / `Annotated[float, Field(ge=..., ...)]`     |
-| `string`                | `StringValidator(min_length=..., ...)`                          | `str` / `Annotated[str, Field(min_length=..., ...)]` |
-| `string` with `pattern` | `RegexValidator(pattern=r'...')`                                | `str` / `Annotated[str, Field(pattern=r'...')]`      |
-| `enum`                  | `EnumValidator(EnumClassName)`                                  | `EnumClassName`                                      |
-| `array`                 | `ListValidator(inner_validator)`                                | `list[inner_type]`                                   |
-| `object`                | `DataclassValidator(ClassName)`                                 | `ClassName`                                          |
-| `$ref`                  | Resolved to the referenced type with property overrides applied |
+| JSON Schema type              | validataclass                                                   | dataclass                                            | pydantic                                             |
+|-------------------------------|-----------------------------------------------------------------|------------------------------------------------------|------------------------------------------------------|
+| `boolean`                     | `BooleanValidator()`                                            | `bool`                                               | `bool`                                               |
+| `integer`                     | `IntegerValidator(min_value=..., ...)`                          | `int`                                                | `int` / `Annotated[int, Field(ge=..., ...)]`         |
+| `number`                      | `FloatValidator(min_value=..., ...)`                            | `float`                                              | `float` / `Annotated[float, Field(ge=..., ...)]`     |
+| `string`                      | `StringValidator(min_length=..., ...)`                          | `str`                                                | `str` / `Annotated[str, Field(min_length=..., ...)]` |
+| `string` with `pattern`       | `RegexValidator(pattern=r'...')`                                | `str`                                                | `Annotated[str, Field(pattern=r'...')]`              |
+| `string` format `date-time`   | `DateTimeValidator()`                                           | `datetime`                                           | `datetime`                                           |
+| `string` format `time`        | `TimeValidator()`                                               | `time`                                               | `time`                                               |
+| `string` format `email`       | `EmailValidator()`                                              | `str`                                                | `EmailStr`                                           |
+| `string` format `uri`         | `UrlValidator()`                                                | `str`                                                | `AnyUrl`                                             |
+| `enum`                        | `EnumValidator(EnumClassName)`                                  | `EnumClassName`                                      | `EnumClassName`                                      |
+| `array`                       | `ListValidator(inner_validator)`                                | `list[inner_type]`                                   | `list[inner_type]`                                   |
+| `object`                      | `DataclassValidator(ClassName)`                                 | `ClassName`                                          | `ClassName`                                          |
+| `$ref`                        | Resolved to the referenced type with property overrides applied |
 
 
 ## Development

@@ -90,6 +90,26 @@ class Number(BaseField):
 
 
 @dataclass(kw_only=True, init=False)
+class DateTime(BaseField):
+    default: str | None = None
+
+
+@dataclass(kw_only=True, init=False)
+class Time(BaseField):
+    default: str | None = None
+
+
+@dataclass(kw_only=True, init=False)
+class Email(BaseField):
+    default: str | None = None
+
+
+@dataclass(kw_only=True, init=False)
+class Uri(BaseField):
+    default: str | None = None
+
+
+@dataclass(kw_only=True, init=False)
 class Enum(BaseField):
     default: str | None = None
 
@@ -230,6 +250,19 @@ class Schema:
 
 
 def parse_schema(schema: dict, **kwargs) -> BaseField:
+    # oneOf/anyOf: pick the first alternative, preferring one without an enum constraint.
+    # Parent-level title/description/default propagate to the chosen alternative.
+    for combiner in ('oneOf', 'anyOf'):
+        alternatives = schema.get(combiner)
+        if not isinstance(alternatives, list) or not alternatives:
+            continue
+        chosen = next((alt for alt in alternatives if isinstance(alt, dict) and 'enum' not in alt), alternatives[0])
+        merged = dict(chosen)
+        for key in ('title', 'description', 'default'):
+            if key not in merged and schema.get(key) is not None:
+                merged[key] = schema[key]
+        return parse_schema(merged, **kwargs)
+
     # Special cases without type
     if schema.get('enum') is not None:
         return Enum(schema, **kwargs)
@@ -244,6 +277,15 @@ def parse_schema(schema: dict, **kwargs) -> BaseField:
     if schema.get('type') == 'number':
         return Number(schema, **kwargs)
     if schema.get('type') == 'string':
+        match schema.get('format'):
+            case 'date-time':
+                return DateTime(schema, **kwargs)
+            case 'time':
+                return Time(schema, **kwargs)
+            case 'email':
+                return Email(schema, **kwargs)
+            case 'uri':
+                return Uri(schema, **kwargs)
         return String(schema, **kwargs)
     if schema.get('type') == 'array':
         return Array(schema, **kwargs)

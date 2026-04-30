@@ -16,12 +16,16 @@ from schema2classes.schema.models import (
     Array,
     BaseField,
     Boolean,
+    DateTime,
+    Email,
     Enum,
     Integer,
     Number,
     Object,
     Reference,
     String,
+    Time,
+    Uri,
 )
 
 logger = logging.getLogger(__name__)
@@ -204,6 +208,34 @@ class RegexBaseOutput(BaseOutput, ABC):
 
 
 @dataclass(kw_only=True, init=False)
+class DateTimeBaseOutput(BaseOutput, ABC):
+    @staticmethod
+    def get_type() -> str:
+        return 'datetime'
+
+
+@dataclass(kw_only=True, init=False)
+class TimeBaseOutput(BaseOutput, ABC):
+    @staticmethod
+    def get_type() -> str:
+        return 'time'
+
+
+@dataclass(kw_only=True, init=False)
+class EmailBaseOutput(BaseOutput, ABC):
+    @staticmethod
+    def get_type() -> str:
+        return 'str'
+
+
+@dataclass(kw_only=True, init=False)
+class UriBaseOutput(BaseOutput, ABC):
+    @staticmethod
+    def get_type() -> str:
+        return 'str'
+
+
+@dataclass(kw_only=True, init=False)
 class ListBaseOutput(BaseOutput, ABC):
     output: BaseOutput
 
@@ -367,6 +399,14 @@ def determine_output(field: BaseField, output_classes: dict) -> type[BaseOutput]
         return output_classes['integer']
     if isinstance(field, Number):
         return output_classes['float']
+    if isinstance(field, DateTime):
+        return output_classes['datetime']
+    if isinstance(field, Time):
+        return output_classes['time']
+    if isinstance(field, Email):
+        return output_classes['email']
+    if isinstance(field, Uri):
+        return output_classes['uri']
     if isinstance(field, String) and field.pattern is not None:
         return output_classes['regex']
     if isinstance(field, String) and field.pattern is None:

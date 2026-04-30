@@ -13,6 +13,8 @@ from schema2classes.config import Config, UnsetValueOutput
 
 from .base_outputs import (
     BooleanBaseOutput,
+    DateTimeBaseOutput,
+    EmailBaseOutput,
     EnumBaseOutput,
     FloatBaseOutput,
     IntegerBaseOutput,
@@ -21,6 +23,8 @@ from .base_outputs import (
     ObjectBaseOutput,
     RegexBaseOutput,
     StringBaseOutput,
+    TimeBaseOutput,
+    UriBaseOutput,
 )
 
 
@@ -132,6 +136,42 @@ class ValidataclassRegexOutput(ValidataclassRenderMixin, RegexBaseOutput):
 
 
 @dataclass(kw_only=True, init=False)
+class ValidataclassDateTimeOutput(ValidataclassRenderMixin, DateTimeBaseOutput):
+    def render_validator(self) -> str:
+        return 'DateTimeValidator()'
+
+    def get_imports(self) -> list[str]:
+        return self._get_base_imports() + ['datetime.datetime', 'validataclass.validators.DateTimeValidator']
+
+
+@dataclass(kw_only=True, init=False)
+class ValidataclassTimeOutput(ValidataclassRenderMixin, TimeBaseOutput):
+    def render_validator(self) -> str:
+        return 'TimeValidator()'
+
+    def get_imports(self) -> list[str]:
+        return self._get_base_imports() + ['datetime.time', 'validataclass.validators.TimeValidator']
+
+
+@dataclass(kw_only=True, init=False)
+class ValidataclassEmailOutput(ValidataclassRenderMixin, EmailBaseOutput):
+    def render_validator(self) -> str:
+        return 'EmailValidator()'
+
+    def get_imports(self) -> list[str]:
+        return self._get_base_imports() + ['validataclass.validators.EmailValidator']
+
+
+@dataclass(kw_only=True, init=False)
+class ValidataclassUriOutput(ValidataclassRenderMixin, UriBaseOutput):
+    def render_validator(self) -> str:
+        return 'UrlValidator()'
+
+    def get_imports(self) -> list[str]:
+        return self._get_base_imports() + ['validataclass.validators.UrlValidator']
+
+
+@dataclass(kw_only=True, init=False)
 class ValidataclassListOutput(ValidataclassRenderMixin, ListBaseOutput):
     def render_validator(self) -> str:
         return f'ListValidator({self.output.render_validator()})'
@@ -166,6 +206,10 @@ VALIDATACLASS_OUTPUT_CLASSES = {
     'integer': ValidataclassIntegerOutput,
     'float': ValidataclassFloatOutput,
     'string': ValidataclassStringOutput,
+    'datetime': ValidataclassDateTimeOutput,
+    'time': ValidataclassTimeOutput,
+    'email': ValidataclassEmailOutput,
+    'uri': ValidataclassUriOutput,
     'enum': ValidataclassEnumOutput,
     'regex': ValidataclassRegexOutput,
     'list': ValidataclassListOutput,

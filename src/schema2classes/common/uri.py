@@ -59,6 +59,10 @@ class URI:
         if reference.startswith('http'):
             return cls(url=location, json_path=json_path)
 
+        # Internal reference (e.g. "#/$defs/Foo"): same file as the parent URI
+        if location == '':
+            return cls(file_path=uri.file_path, url=uri.url, json_path=json_path)
+
         # TODO: local file path in a schema via URL
         if location.startswith('/'):
             return cls(file_path=Path(location), json_path=json_path)

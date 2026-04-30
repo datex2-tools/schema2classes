@@ -12,6 +12,8 @@ from schema2classes.common.helper import to_snake_case
 
 from .base_outputs import (
     BooleanBaseOutput,
+    DateTimeBaseOutput,
+    EmailBaseOutput,
     EnumBaseOutput,
     FloatBaseOutput,
     IntegerBaseOutput,
@@ -20,6 +22,8 @@ from .base_outputs import (
     ObjectBaseOutput,
     RegexBaseOutput,
     StringBaseOutput,
+    TimeBaseOutput,
+    UriBaseOutput,
 )
 
 
@@ -80,6 +84,28 @@ class DataclassRegexOutput(DataclassRenderMixin, RegexBaseOutput):
 
 
 @dataclass(kw_only=True, init=False)
+class DataclassDateTimeOutput(DataclassRenderMixin, DateTimeBaseOutput):
+    def get_imports(self) -> list[str]:
+        return ['datetime.datetime']
+
+
+@dataclass(kw_only=True, init=False)
+class DataclassTimeOutput(DataclassRenderMixin, TimeBaseOutput):
+    def get_imports(self) -> list[str]:
+        return ['datetime.time']
+
+
+@dataclass(kw_only=True, init=False)
+class DataclassEmailOutput(DataclassRenderMixin, EmailBaseOutput):
+    pass
+
+
+@dataclass(kw_only=True, init=False)
+class DataclassUriOutput(DataclassRenderMixin, UriBaseOutput):
+    pass
+
+
+@dataclass(kw_only=True, init=False)
 class DataclassListOutput(DataclassRenderMixin, ListBaseOutput):
     def get_imports(self) -> list[str]:
         return self.output.get_imports()
@@ -105,6 +131,10 @@ DATACLASS_OUTPUT_CLASSES = {
     'integer': DataclassIntegerOutput,
     'float': DataclassFloatOutput,
     'string': DataclassStringOutput,
+    'datetime': DataclassDateTimeOutput,
+    'time': DataclassTimeOutput,
+    'email': DataclassEmailOutput,
+    'uri': DataclassUriOutput,
     'enum': DataclassEnumOutput,
     'regex': DataclassRegexOutput,
     'list': DataclassListOutput,
