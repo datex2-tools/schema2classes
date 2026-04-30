@@ -12,6 +12,8 @@ from schema2classes.common.helper import to_snake_case
 
 from .base_outputs import (
     BooleanBaseOutput,
+    DateTimeBaseOutput,
+    EmailBaseOutput,
     EnumBaseOutput,
     FloatBaseOutput,
     IntegerBaseOutput,
@@ -20,6 +22,8 @@ from .base_outputs import (
     ObjectBaseOutput,
     RegexBaseOutput,
     StringBaseOutput,
+    TimeBaseOutput,
+    UriBaseOutput,
 )
 
 
@@ -163,6 +167,38 @@ class PydanticRegexOutput(PydanticRenderMixin, RegexBaseOutput):
 
 
 @dataclass(kw_only=True, init=False)
+class PydanticDateTimeOutput(PydanticRenderMixin, DateTimeBaseOutput):
+    def get_imports(self) -> list[str]:
+        return ['datetime.datetime']
+
+
+@dataclass(kw_only=True, init=False)
+class PydanticTimeOutput(PydanticRenderMixin, TimeBaseOutput):
+    def get_imports(self) -> list[str]:
+        return ['datetime.time']
+
+
+@dataclass(kw_only=True, init=False)
+class PydanticEmailOutput(PydanticRenderMixin, EmailBaseOutput):
+    @staticmethod
+    def get_type() -> str:
+        return 'EmailStr'
+
+    def get_imports(self) -> list[str]:
+        return ['pydantic.EmailStr']
+
+
+@dataclass(kw_only=True, init=False)
+class PydanticUriOutput(PydanticRenderMixin, UriBaseOutput):
+    @staticmethod
+    def get_type() -> str:
+        return 'AnyUrl'
+
+    def get_imports(self) -> list[str]:
+        return ['pydantic.AnyUrl']
+
+
+@dataclass(kw_only=True, init=False)
 class PydanticListOutput(PydanticRenderMixin, ListBaseOutput):
     def get_imports(self) -> list[str]:
         return self.output.get_imports()
@@ -190,6 +226,10 @@ PYDANTIC_OUTPUT_CLASSES = {
     'integer': PydanticIntegerOutput,
     'float': PydanticFloatOutput,
     'string': PydanticStringOutput,
+    'datetime': PydanticDateTimeOutput,
+    'time': PydanticTimeOutput,
+    'email': PydanticEmailOutput,
+    'uri': PydanticUriOutput,
     'enum': PydanticEnumOutput,
     'regex': PydanticRegexOutput,
     'list': PydanticListOutput,

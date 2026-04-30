@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "Simple Formats",
+  "required": [
+    "test_required_datetime"
+  ],
+  "properties": {
+    "test_required_datetime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "test_datetime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "test_time": {
+      "type": "string",
+      "format": "time"
+    },
+    "test_email": {
+      "type": "string",
+      "format": "email"
+    },
+    "test_uri": {
+      "type": "string",
+      "format": "uri"
+    }
+  }
+}

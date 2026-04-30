@@ -6,6 +6,8 @@ Use of this source code is governed by an MIT-style license that can be found in
 from .base_outputs import (  # noqa: F401
     BaseOutput,
     BooleanBaseOutput,
+    DateTimeBaseOutput,
+    EmailBaseOutput,
     EnumBaseOutput,
     FloatBaseOutput,
     IntegerBaseOutput,
@@ -14,6 +16,8 @@ from .base_outputs import (  # noqa: F401
     ObjectBaseOutput,
     RegexBaseOutput,
     StringBaseOutput,
+    TimeBaseOutput,
+    UriBaseOutput,
     determine_output,
     follow_reference,
 )
