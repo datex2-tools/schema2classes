@@ -76,7 +76,7 @@ jobs:
           path: dist/
 
       - name: Upload package to GitHub release assets
-        uses: AButler/upload-release-assets@v3.0
+        uses: AButler/upload-release-assets@v4.0
         with:
           files: dist/*
           repo-token: ${{ secrets.GITHUB_TOKEN }}
